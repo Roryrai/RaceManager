@@ -10,7 +10,7 @@ Feel free to create new sheets to test more stuff. If you do, you'll need to upd
 
 https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit#gid=0
 
-Modifying config fields may cause undefined behavior.
+Modifying config fields may cause undefined behavior. I've sorted the signup sheet by participants. A different sort may cause undefined behavior.
 
 You will need a file called credentials.json placed in the same directory as race.py. I got mine from the Google sheets quickstart app but I'm not totally sure if it contains sensitive information in it anywhere so it's not in the repository. I suspect there's a better way to go about this part but I don't really understand what's actually going on.
 
