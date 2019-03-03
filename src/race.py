@@ -16,7 +16,7 @@ from google.auth.transport.requests import Request
 # Spreadsheet IDs and ranges
 SIGNUP_SHEET_ID = "15tP_j0SnXZu3GbCdRmnDqTCJZlhOEVqx_jBCAS03qQg"
 SIGNUP_SHEET_RANGE = "Form Responses 1!C2:O54"
-RESULTS_SHEET_ID = "1uRJvUgsTRP3LM3CK4vclrYrqVGj_RqSOrDaHZ8RpyDY"
+RESULTS_SHEET_ID = "1tM_BZ1-rLLdk5evN3LuQrPxfHigi6Jwnsk5SCE3MG9A"
 RESULTS_SHEET_RANGE = "Times!A2:X"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
@@ -86,7 +86,6 @@ def runnerInfo(signupSheet, resultsSheet, entrants):
                                 resultsSheetRow[i] = raceDate()
                             break
             map[row[SRL_COLUMN_INDEX]] = info
-        print(map)
         return map
     except IndexError:
         return None
@@ -288,12 +287,12 @@ def run(signupSheet, resultsSheet):
     kadgar(everyone, entrants)
 
     results = enterTimes(everyone, entrants, resultsSheet)
-    print("Final Results:")
-    printSheet(results, 15)
+    updateResults(results)
+    # print("Final Results:")
+    # printSheet(results, 15)
 
-
-# Copied from Google's quickstart sheets project
-def getSheet(id, range, scope):
+    
+def auth():
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -312,6 +311,11 @@ def getSheet(id, range, scope):
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(creds, token)
+    return creds
+
+# Copied from Google's quickstart sheets project
+def getSheet(id, range, scope):
+    creds = auth()
 
     service = build('sheets', 'v4', credentials=creds)
 
@@ -332,25 +336,33 @@ def getSheet(id, range, scope):
 
 # Sends an update request to the google sheets API to load the race results
 # into our google sheets.
-def updateSheet(sheet, data):
-    requests = []
-    updateReq = {
-        "rows": [
-        {
-          object(data)
-        }
-        ],
-        "fields": string,
+def updateResults(data):
+    creds = auth()
+    service = build('sheets', 'v4', credentials=creds)
+    body = {
+        "values": data
+    }
+    
+    result = service.spreadsheets().values().update(spreadsheetId=RESULTS_SHEET_ID, range=RESULTS_SHEET_RANGE, valueInputOption="RAW", body=body).execute()
+    print("{0} cells updated.".format(result.get("updatedCells")))
+    
+    # updateReq = {
+        # "rows": [
+        # {
+          # object(data)
+        # }
+        # ],
+        # "fields": string,
 
         # Union field area can be only one of the following:
-        "start": {
-        object(GridCoordinate)
-        },
-        "range": {
-        object(GridRange)
-        }
+        # "start": {
+        # object(GridCoordinate)
+        # },
+        # "range": {
+        # object(GridRange)
+        # }
         # End of list of possible types for union field area.
-}
+# }
 
 
 def main():
