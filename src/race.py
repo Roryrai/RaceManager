@@ -258,7 +258,7 @@ def run(signupSheet, resultsSheet):
     # printSheet(results, 15)
 
     
-def auth():
+def auth(scope):
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -281,7 +281,7 @@ def auth():
 
 # Copied from Google's quickstart sheets project
 def getSheet(id, range, scope):
-    creds = auth()
+    creds = auth(scope)
 
     service = build('sheets', 'v4', credentials=creds)
 
