@@ -14,6 +14,8 @@ Modifying config fields may cause undefined behavior. I've sorted the signup she
 
 You will need a file called credentials.json placed in the same directory as race.py. I got mine from the Google sheets quickstart app but I'm not totally sure if it contains sensitive information in it anywhere so it's not in the repository. I suspect there's a better way to go about this part but I don't really understand what's actually going on.
 
+You will also need the Google API libraries for Python. I followed the instructions here: https://developers.google.com/sheets/api/quickstart/python, you can follow this up through step 2 and you should be good. Following this will also give you a credentials.json file.
+
 # Usage
 Currently there is only basic command line functionality. Launch via CLI and follow the prompts.
 
