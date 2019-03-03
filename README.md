@@ -31,8 +31,8 @@ ask you to record their results.
 
 When entering times for runners, SRL names should again be used. Times must be entered in one of the following formats:
 
-H:MM:SS
-MM:SS
+- H:MM:SS
+- MM:SS
 
 Entering "FF" will mark a forfeit for that runner.
 
