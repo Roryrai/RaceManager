@@ -5,7 +5,7 @@ import datetime
 import pickle
 import os.path
 import re
-
+import json
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -13,52 +13,18 @@ from google.auth.transport.requests import Request
 
 # entrants = "roryrai | rainbowpoogle | Grim | Terra | Kydra"
 
-# Spreadsheet IDs and ranges
-SIGNUP_SHEET_ID = "15tP_j0SnXZu3GbCdRmnDqTCJZlhOEVqx_jBCAS03qQg"
-SIGNUP_SHEET_RANGE = "Form Responses 1!C2:O54"
-RESULTS_SHEET_ID = "1tM_BZ1-rLLdk5evN3LuQrPxfHigi6Jwnsk5SCE3MG9A"
-RESULTS_SHEET_RANGE = "Times!A2:X"
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
-
-# Index of SRL name in the signup sheet
-SRL_COLUMN_INDEX = 12
-
-# Index of preferred name in the signup sheet
-PREFERRED_COLUMN_INDEX = 0
-
-# Index of Twitch name in the signup sheet
-TWITCH_COLUMN_INDEX = 11
-
-# Index of the first Race Date column in the results sheet
-RACE_DATES_COLUMN_INDEX = 9
-
-# Index of the first Qualifier Time column in the results sheet
-RACE_TIMES_COLUMN_INDEX = 2
-
-# Start of the url for the kadgar link for viewing
-VIEWING_URL = "http://kadgar.net"
-
-
-# Fake signup spreadsheet rows
-# [Preferred, Discord, SRL, Twitch]
-signupHeader = ["Preferred", "Discord", "SRL", "Twitch"]
-roryrai = ['Roryrai', 'Roryrai#4160', 'roryrai', 'Roryrai']
-meldon = ['Meldon', 'Meldon#1234', 'Meldon', 'MeldonTaragon']
-terra = ['Terra', 'Terra#1234', 'Terra', 'Terra21']
-vulajin = ['Vulajin', 'Vulajin#1234', 'Vulajin', 'Vulajin']
-
-# Fake results spreadsheet rows
-#                Name,       Avg,       Race 1,     Race 2,     Race 3,     Date 1,     Vod 1,      Date 2,     Vod 2,      Date 3,     Vod 3
-resultsHeader = ['Name',     'Avg',     'Race 1',  'Race 2',   'Race 3',   'Date 1',   'Vod 1',    'Date 2',   'Vod 2',    'Date 3',   'Vod 3']
-resultsR =      ['Roryrai',  None,      None,       None,       None,       None,       None,       None,       None,       None,       None]
-resultsM =      ['Meldon',   None,      None,       None,       None,       None,       None,       None,       None,       None,       None]
-resultsT =      ['Terra',    None,      '30:21',    None,       None,       '3/20/19',  'vod-1',    '3/30/19',  None,       None,       None]
-resultsV =      ['Vulajin',  None,      '30:38',    '31:12',    '31:30',    '3/22/19',  'vod-1',    '3/28/19',  'vod-2',    '3/30/19',  None]
-
-# "Spreadsheets"
-signupSheet = [signupHeader, roryrai, meldon, terra, vulajin]
-resultsSheet = [resultsHeader, resultsR, resultsM, resultsT, resultsV]
-
+# Yes I know globals are awful but I'm lazy. These values are set using config.json.
+SIGNUP_SHEET_ID = None
+SIGNUP_SHEET_RANGE = None
+RESULTS_SHEET_ID = None
+RESULTS_SHEET_RANGE = None
+SCOPES = None
+SRL_COLUMN_INDEX = None
+PREFERRED_COLUMN_INDEX = None
+TWITCH_COLUMN_INDEX = None
+RACE_DATES_COLUMN_INDEX = None
+RACE_TIMES_COLUMN_INDEX = None
+VIEWING_URL = None
 
 # Maps SRL names to the runner's preferred name and twitch name.
 # Returns a dictionary with SRL names as keys, each mapping to
@@ -321,8 +287,7 @@ def getSheet(id, range, scope):
 
     # Call the Sheets API
     sheet = service.spreadsheets()
-    result = sheet.values().get(spreadsheetId=id,
-                                range=range).execute()
+    result = sheet.values().get(spreadsheetId=id, range=range).execute()
     values = result.get('values', [])
 
     if not values:
@@ -345,27 +310,39 @@ def updateResults(data):
     
     result = service.spreadsheets().values().update(spreadsheetId=RESULTS_SHEET_ID, range=RESULTS_SHEET_RANGE, valueInputOption="RAW", body=body).execute()
     print("{0} cells updated.".format(result.get("updatedCells")))
-    
-    # updateReq = {
-        # "rows": [
-        # {
-          # object(data)
-        # }
-        # ],
-        # "fields": string,
 
-        # Union field area can be only one of the following:
-        # "start": {
-        # object(GridCoordinate)
-        # },
-        # "range": {
-        # object(GridRange)
-        # }
-        # End of list of possible types for union field area.
-# }
+    
+# Loads the settings in the file config.json
+def loadConfig():
+    global SIGNUP_SHEET_ID
+    global SIGNUP_SHEET_RANGE
+    global RESULTS_SHEET_ID
+    global RESULTS_SHEET_RANGE
+    global SCOPES
+    global SRL_COLUMN_INDEX
+    global PREFERRED_COLUMN_INDEX
+    global TWITCH_COLUMN_INDEX
+    global RACE_DATES_COLUMN_INDEX
+    global RACE_TIMES_COLUMN_INDEX
+    global VIEWING_URL
+    
+    configFile = open("config.json", "r")
+    config = json.loads(configFile.read())
+    SIGNUP_SHEET_ID = config["signup_id"]
+    SIGNUP_SHEET_RANGE = config["signup_range"]
+    RESULTS_SHEET_ID = config["results_id"]
+    RESULTS_SHEET_RANGE = config["results_range"]
+    SCOPES = config["scopes"]
+    SRL_COLUMN_INDEX = config["srl_column_index"]
+    PREFERRED_COLUMN_INDEX = config["preferred_column_index"]
+    TWITCH_COLUMN_INDEX = config["twitch_column_index"]
+    RACE_DATES_COLUMN_INDEX = config["race_dates_column_index"]
+    RACE_TIMES_COLUMN_INDEX = config["race_times_column_index"]
+    VIEWING_URL = config["view_url"]
 
 
 def main():
+    loadConfig()
     signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE, SCOPES)
     resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE, SCOPES)
     
