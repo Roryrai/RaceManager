@@ -15,23 +15,23 @@ from google.auth.transport.requests import Request
 
 
 # Spreadsheet IDs and ranges
-SIGNUP_SHEET_ID = None
-SIGNUP_SHEET_RANGE = None
-RESULTS_SHEET_ID = None
-RESULTS_SHEET_RANGE = None
-SCOPES = None
+SIGNUP_SHEET_ID = "15tP_j0SnXZu3GbCdRmnDqTCJZlhOEVqx_jBCAS03qQg"
+SIGNUP_SHEET_RANGE = "Form Responses 1!C2:O54"
+RESULTS_SHEET_ID = "1uRJvUgsTRP3LM3CK4vclrYrqVGj_RqSOrDaHZ8RpyDY"
+RESULTS_SHEET_RANGE = "Times!A2:W"
+SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # Index of SRL name in the signup sheet
-SRL_COLUMN_INDEX = 2
+SRL_COLUMN_INDEX = 12
 
 # Index of preferred name in the signup sheet
 PREFERRED_COLUMN_INDEX = 0
 
 # Index of Twitch name in the signup sheet
-TWITCH_COLUMN_INDEX = 3
+TWITCH_COLUMN_INDEX = 11
 
 # Index of the first Race Date column in the results sheet
-RACE_DATES_COLUMN_INDEX = 5
+RACE_DATES_COLUMN_INDEX = 9
 
 # Index of the first Qualifier Time column in the results sheet
 RACE_TIMES_COLUMN_INDEX = 2
@@ -317,7 +317,10 @@ def getSheet(id, range, scope):
     if not values:
         print('No data found.')
     else:
-        return sheet
+        # for row in values:
+            # Print columns A and E, which correspond to indices 0 and 4.
+            # print('%s, %s' % (row[0], row[4]))
+        return values
 
 
 # Sends an update request to the google sheets API to load the race results
@@ -344,9 +347,28 @@ def updateSheet(sheet, data):
 
 
 def main():
-    # signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE, SCOPES)
-    # resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE, SCOPES)
-    run(signupSheet, resultsSheet)
+    signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE, SCOPES)
+    resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE, SCOPES)
+    
+    # printSheet(signupSheet)
+    # printSheet(resultsSheet)
+    
+    for row in signupSheet:
+        print(row[PREFERRED_COLUMN_INDEX])
+        try:
+            print(row[TWITCH_COLUMN_INDEX])
+            print(row[SRL_COLUMN_INDEX])
+        except IndexError:
+            print("IndexError")
+    # for row in resultsSheet:
+        # print(row[0], len(row))
+        # try:
+            # print(row[RACE_TIMES_COLUMN_INDEX])
+            # print(row[RACE_DATES_COLUMN_INDEX])
+        # except IndexError:
+            # continue
+    
+    # run(signupSheet, resultsSheet)
 
 
 if __name__ == "__main__":
