@@ -11,14 +11,13 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-# entrants = "roryrai | Meldon | Vulajin | Terra"
-
+# entrants = "roryrai | rainbowpoogle | Grim | Terra | Kydra"
 
 # Spreadsheet IDs and ranges
 SIGNUP_SHEET_ID = "15tP_j0SnXZu3GbCdRmnDqTCJZlhOEVqx_jBCAS03qQg"
 SIGNUP_SHEET_RANGE = "Form Responses 1!C2:O54"
 RESULTS_SHEET_ID = "1uRJvUgsTRP3LM3CK4vclrYrqVGj_RqSOrDaHZ8RpyDY"
-RESULTS_SHEET_RANGE = "Times!A2:W"
+RESULTS_SHEET_RANGE = "Times!A2:X"
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # Index of SRL name in the signup sheet
@@ -79,16 +78,19 @@ def runnerInfo(signupSheet, resultsSheet, entrants):
             # Figure out how many races this person has done
             # -1 means they've done all their possible races
             for resultsSheetRow in resultsSheet:
-                if resultsSheetRow[0] is row[PREFERRED_COLUMN_INDEX]:
+                if resultsSheetRow[0] == row[PREFERRED_COLUMN_INDEX]:
                     for i in range(RACE_DATES_COLUMN_INDEX, len(resultsSheetRow), 2):
-                        if resultsSheetRow[i] is None:
+                        if resultsSheetRow[i] == "":
                             info["raceNumber"] = int((i - RACE_DATES_COLUMN_INDEX) / 2)
-                            if resultsSheetRow[0] in entrants: resultsSheetRow[i] = raceDate()
+                            if row[SRL_COLUMN_INDEX] in entrants:
+                                resultsSheetRow[i] = raceDate()
                             break
             map[row[SRL_COLUMN_INDEX]] = info
+        print(map)
         return map
     except IndexError:
         return None
+
 
 
 # Returns a string with date formatted as (M)M/(D)D/YY
@@ -183,7 +185,7 @@ def addResult(everyone, runner, time, results):
     for row in results:
         if everyone[runner]["preferred"] == row[0]:
             raceIndex = everyone[runner]["raceNumber"] + RACE_TIMES_COLUMN_INDEX
-            if row[raceIndex] is None:
+            if row[raceIndex] is "":
                 finished = 1
             row[raceIndex] = time if time != "FF" else ""
             break
@@ -252,6 +254,10 @@ def excludeMaxedOut(everyone, entrants):
 
 # Run the program once data has been retrieved
 def run(signupSheet, resultsSheet):
+    if signupSheet == None or resultsSheet == None:
+        print("Unable to load Google Sheets")
+        sys.exit(1)
+
     # This should be copy/pasted from the .entrants command
     # in SRL. The | and (Ready) can be left in.
     entrants = input("List of entrants (copy from SRL): ")
@@ -262,6 +268,7 @@ def run(signupSheet, resultsSheet):
     # so remove those entrants.
     entrants = entrants.split(" | ")
     entrants = unready(entrants)
+    
     organizerRemoved = False
     while organizerRemoved is False:
         try:
@@ -353,22 +360,26 @@ def main():
     # printSheet(signupSheet)
     # printSheet(resultsSheet)
     
-    for row in signupSheet:
-        print(row[PREFERRED_COLUMN_INDEX])
-        try:
-            print(row[TWITCH_COLUMN_INDEX])
-            print(row[SRL_COLUMN_INDEX])
-        except IndexError:
-            print("IndexError")
+    # for row in signupSheet:
+        # print(row[PREFERRED_COLUMN_INDEX])
+        # try:
+            # print(row[TWITCH_COLUMN_INDEX])
+            # print(row[SRL_COLUMN_INDEX])
+        # except IndexError:
+            # print("IndexError")
     # for row in resultsSheet:
         # print(row[0], len(row))
         # try:
+            # if row[RACE_TIMES_COLUMN_INDEX] == None:
+                # print("None")
+            # if row[RACE_TIMES_COLUMN_INDEX] == "":
+                # print("Empty String")
             # print(row[RACE_TIMES_COLUMN_INDEX])
             # print(row[RACE_DATES_COLUMN_INDEX])
         # except IndexError:
-            # continue
+            # print("IndexError")
     
-    # run(signupSheet, resultsSheet)
+    run(signupSheet, resultsSheet)
 
 
 if __name__ == "__main__":
