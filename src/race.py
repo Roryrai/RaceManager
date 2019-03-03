@@ -258,7 +258,7 @@ def run(signupSheet, resultsSheet):
     # printSheet(results, 15)
 
     
-def auth(scope):
+def auth():
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -272,7 +272,7 @@ def auth(scope):
             creds.refresh(Request())
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
-                'credentials.json', scope)
+                'credentials.json', SCOPES)
             creds = flow.run_local_server()
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
@@ -280,8 +280,8 @@ def auth(scope):
     return creds
 
 # Copied from Google's quickstart sheets project
-def getSheet(id, range, scope):
-    creds = auth(scope)
+def getSheet(id, range):
+    creds = auth()
 
     service = build('sheets', 'v4', credentials=creds)
 
@@ -343,8 +343,8 @@ def loadConfig():
 
 def main():
     loadConfig()
-    signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE, SCOPES)
-    resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE, SCOPES)
+    signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE)
+    resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE)
     
     # printSheet(signupSheet)
     # printSheet(resultsSheet)
