@@ -1,6 +1,9 @@
 # RaceManager
 Python tool to help manage Ori and the Blind Forest tournament qualifier races by interfacing with Google Sheets.
 
+# Requires Python 3
+Python 2 and Python 3 have different console input functions and this was written on Python 3.
+
 # Setup
 Download the files race.py and config.json into the same directory. For testing, please use the google sheets in the following locations:
 
