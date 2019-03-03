@@ -1,6 +1,19 @@
 # RaceManager
 Python tool to help manage Ori and the Blind Forest tournament qualifier races by interfacing with Google Sheets.
 
+# Setup
+Download the files race.py and config.json into the same directory. For testing, please use the google sheets in the following locations:
+
+Ori Tournaments/2019 All Skills Tournament/Organizers/TEST
+
+Feel free to create new sheets to test more stuff. If you do, you'll need to update their respective "id" fields within config.json. The sheet ID can be obtained from the spreadsheet URL:
+
+https://docs.google.com/spreadsheets/d/<SHEET_ID>/edit#gid=0
+
+Modifying config fields may cause undefined behavior.
+
+You will need a file called credentials.json placed in the same directory as race.py. I got mine from the Google sheets quickstart app but I'm not totally sure if it contains sensitive information in it anywhere so it's not in the repository. I suspect there's a better way to go about this part but I don't really understand what's actually going on.
+
 # Usage
 Currently there is only basic command line functionality. Launch via CLI and follow the prompts.
 
@@ -43,3 +56,4 @@ set to testing sheets based on the All Skills sheets and if this all goes well i
 # Known issues
 - List of entrants in the SRL race isn't validated against SRL names of people registered for the tournament so unregistered entrants will not work.
 - If someone's name on the qualifier results sheet does not _exactly_ match their preferred name in the signup sheet, the program will not find them.
+- Forfeits are not currently marked as red cells.
