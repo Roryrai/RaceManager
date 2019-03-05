@@ -87,7 +87,7 @@ def kadgar(map, entrants):
     for name in entrants:
         twitchName = map[name]["twitch"]
         url += "/" + twitchName
-    print("\nViewing link: %s" % url)
+    print("\nViewing link: %s\n" % url)
 
 
 # Enter time (as a string)
@@ -95,6 +95,10 @@ def kadgar(map, entrants):
 # Entrants is an array of SRL names
 # Results is the results sheet
 def enterTimes(everyone, entrants, results):
+    if len(entrants) == 0:
+        print("This race has no entrants. No results will be updated. Exiting.")
+        sys.exit(0)
+    
     print("\nEnter final times for %d %s:" % (len(entrants), "runner" if len(entrants) is 1 else "runners"))
     verified = False
 
@@ -211,9 +215,16 @@ def unready(entrants):
 
 # Exclude all entrants in the race who are already maxed out
 def excludeMaxedOut(everyone, entrants):
+    excluded = list()
     for runner in entrants:
         if everyone[runner]["raceNumber"] == -1:
-            entrants.remove(runner)
+            excluded.append(runner)
+    if len(excluded) > 0:
+        print("The following runners have reached the maximum number of allowable races and will be excluded from results entry:")
+        print(excluded)
+        print()
+        for runner in excluded:
+            entrants.remove(runner)     
     return entrants
 
 
@@ -244,13 +255,16 @@ def run(signupSheet, resultsSheet):
             print("Can't remove someone not in the race")
 
     everyone = runnerInfo(signupSheet, resultsSheet, entrants)
+    
+    # Print out a viewing link
+    kadgar(everyone, entrants)
+
     entrants = excludeMaxedOut(everyone, entrants)
     if everyone == None:
         print("Could not load runner information")
         sys.exit(1)
 
-    # Print out a viewing link
-    kadgar(everyone, entrants)
+
 
     results = enterTimes(everyone, entrants, resultsSheet)
     updateResults(results)
