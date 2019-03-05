@@ -1,2 +1,4 @@
-src\credentials.json
-src\token.pickle
+
+src/credentials.json
+src/token.pickle
+Notes.txt
