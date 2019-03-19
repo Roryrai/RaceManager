@@ -354,11 +354,22 @@ def loadConfig():
     RACE_TIMES_COLUMN_INDEX = config["race_times_column_index"]
     VIEWING_URL = config["view_url"]
 
+def checkSheets(signup, results):
+    print("SIGNUP SHEET")
+    print("-"*80)
+    printSheet(signup, 15)
+    print("RESULTS SHEET")
+    print("-"*80)
+    printSheet(results, 15)
+    sys.exit(0)
 
 def main():
     loadConfig()
     signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE)
     resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE)
+    
+    if sys.argv[1] == "--check":
+        checkSheets(signupSheet, resultsSheet)
     
     # printSheet(signupSheet)
     # printSheet(resultsSheet)
