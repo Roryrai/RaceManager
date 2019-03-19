@@ -1,6 +1,12 @@
 # RaceManager
 Python tool to help manage Ori and the Blind Forest tournament qualifier races by interfacing with Google Sheets.
 
+# UPDATE FOR ACNR
+- Added the "--check" command line argument. This will print the signup sheet and the results sheet and exit the program. Use this to verify your configuration is pulling the correct sheets.
+- Updated config.json to reference the new sheets for the ACNR signups and the ANCR qualifier results. ACNR signups sheet still needs to be sorted with all participating runners at the top.
+
+
+
 # Requires Python 3
 Python 2 and Python 3 have different console input functions and this was written on Python 3.
 
