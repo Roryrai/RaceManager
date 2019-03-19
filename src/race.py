@@ -26,6 +26,9 @@ RACE_DATES_COLUMN_INDEX = None
 RACE_TIMES_COLUMN_INDEX = None
 VIEWING_URL = None
 
+# Passed by the user, this is the 3PM, 10PM, etc
+RACE_TIME_SLOT = None
+
 # Maps SRL names to the runner's preferred name and twitch name.
 # Returns a dictionary with SRL names as keys, each mapping to
 # another dictionary with "twitch" and "preferred" as keys.
@@ -354,6 +357,7 @@ def loadConfig():
     RACE_TIMES_COLUMN_INDEX = config["race_times_column_index"]
     VIEWING_URL = config["view_url"]
 
+# Prints the signup and results sheets to the console to configuration
 def checkSheets(signup, results):
     print("SIGNUP SHEET")
     print("-"*80)
@@ -361,38 +365,22 @@ def checkSheets(signup, results):
     print("RESULTS SHEET")
     print("-"*80)
     printSheet(results, 15)
-    sys.exit(0)
 
 def main():
+    # Load the configuration and fetch the sheets
     loadConfig()
     signupSheet = getSheet(SIGNUP_SHEET_ID, SIGNUP_SHEET_RANGE)
     resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE)
     
-    if sys.argv[1] == "--check":
+    # Handle command line args
+    if len(sys.argv) == 1 and sys.argv[1] == "--check":
         checkSheets(signupSheet, resultsSheet)
+        sys.exit(0)
+    elif len(sys.argv) != 0:
+        print("Invalid arguments")
+        sys.exit(1)
     
-    # printSheet(signupSheet)
-    # printSheet(resultsSheet)
-    
-    # for row in signupSheet:
-        # print(row[PREFERRED_COLUMN_INDEX])
-        # try:
-            # print(row[TWITCH_COLUMN_INDEX])
-            # print(row[SRL_COLUMN_INDEX])
-        # except IndexError:
-            # print("IndexError")
-    # for row in resultsSheet:
-        # print(row[0], len(row))
-        # try:
-            # if row[RACE_TIMES_COLUMN_INDEX] == None:
-                # print("None")
-            # if row[RACE_TIMES_COLUMN_INDEX] == "":
-                # print("Empty String")
-            # print(row[RACE_TIMES_COLUMN_INDEX])
-            # print(row[RACE_DATES_COLUMN_INDEX])
-        # except IndexError:
-            # print("IndexError")
-    
+    # Run the actual program
     run(signupSheet, resultsSheet)
 
 
