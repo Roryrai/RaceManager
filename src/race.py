@@ -36,7 +36,7 @@ RACE_TIME_SLOT = None
 # index of the qualifier race they're on ("raceNumber").
 # The "raceNumber" key will be -1 if the runner has done the
 # maximum number of qualifiers already, so we can skip their results.
-def runnerInfo(signupSheet, resultsSheet, entrants):
+def runnerInfo(signupSheet, resultsSheet, entrants, timeString):
     try:
         map = {}
         for row in signupSheet:
@@ -52,7 +52,7 @@ def runnerInfo(signupSheet, resultsSheet, entrants):
                         if resultsSheetRow[i] == "":
                             info["raceNumber"] = int((i - RACE_DATES_COLUMN_INDEX) / 2)
                             if row[SRL_COLUMN_INDEX] in entrants:
-                                resultsSheetRow[i] = raceDate()
+                                resultsSheetRow[i] = raceDate(timeString)
                             break
             map[row[SRL_COLUMN_INDEX]] = info
         return map
@@ -62,24 +62,46 @@ def runnerInfo(signupSheet, resultsSheet, entrants):
 
 
 # Returns a string with date formatted as (M)M/(D)D/YY
-def raceDate():
-    today = datetime.date.today()
+def raceDate(timeString):
+    today = datetime.datetime.now()
     dateString = str(today.month) + "/" + str(today.day) + "/" + str(today.year)[2:]
+    dateString += " " + timeString
     return dateString
 
+    
+# Gets the hour of the current race. Defaults to asking if the closest hour to now is correct.
+def raceTime(now):
+    hour = now.hour
+    minute = now.minute
+    pm = False
+    if hour / 12 > 1:
+        pm = True
+    hour = hour % 12
+    
+    if minute >= 30:
+        hour += 1
+    
+    timeString = str(hour)
+    if pm:
+        timeString += "PM"
+    else:
+        timeString += "AM"
+    
+    if not askUser("It looks like this race is occuring at %s. Is this correct?" % timeString):
+        validTime = False
+        while not validTime:
+            timeString = input("Please enter the hour this race is occuring at (e.g. 11AM, 3PM, 10PM): ").upper()
+            validTime = matchTimePattern(timeString)
+            print(timeString + " " + str(validTime))
+    return timeString
 
-# Sets the race date of whoever is racing today
-def raceDates(entrants, resultsSheet, everyone):
-    for name in entrants:
-        for row in resultsSheet:
-            if name == row[0]:
-                # Enter today's date for that race number if possible
-                if everyone[name]["raceNumber"] != -1:
-                    today = datetime.date.today()
-                    dateString = str(today.month) + "/" + str(today.day) + "/" + str(today.year)[2:]
-                    dateSlot = everyone[name]["raceNumber"] * 2 + RACE_DATES_COLUMN_INDEX
-                    row[dateSlot] = dateString
-    return resultsSheet
+# Matches against a regular expression allowing values for each hour
+def matchTimePattern(timeString):
+    match = re.search("^([2-9]|1[0-2]?)(AM|PM)$", timeString)
+    if not match:
+        return False
+    else:
+        return True
 
 
 # Creates a kadgar link to view the qualifier.
@@ -124,7 +146,7 @@ def enterTimes(everyone, entrants, results):
         # Make sure the user actually enters a time in the correct format
         time = None
         while not time:
-            time = matchPattern(input("Final time for %s: " % name))
+            time = matchResultPattern(input("Final time for %s: " % name))
             if not time:
                 print("Invalid time format")
 
@@ -137,7 +159,7 @@ def enterTimes(everyone, entrants, results):
 
 # Confirms what's been entered matchs H:MM:SS format.
 # In case hours were omitted, adds a leading "0:".
-def matchPattern(time):
+def matchResultPattern(time):
     if time == "FF":
         return time
     match = re.search("^[0-9]:[0-5][0-9]:[0-5][0-9]$", time)
@@ -229,18 +251,25 @@ def excludeMaxedOut(everyone, entrants):
                 maxed.append(runner)
         except KeyError:
             notEntered.append(runner)
+    
+    warn = False
     if len(maxed) > 0:
-        print("The following runners have reached the maximum number of allowable races and will be excluded from results entry:")
+        print("The following runners appear to have reached the maximum number of allowable races and will be excluded from results entry:")
         print(maxed)
         print()
+        print("If this is not correct, please enter their times manually.\n")
+        warn = True
         for runner in maxed:
             entrants.remove(runner)
     if len(notEntered) > 0:
-        print("The following runners are not registered for the tournament. If they intend to register, please enter their times manually for this race.")
+        print("The following runners are not registered for the tournament. If they intend to register, please enter their times manually for this race:")
         print(notEntered)
         print()
+        warn = True
         for runner in notEntered:
             entrants.remove(runner)
+    if warn:
+        print("WARNING - MANUALLY ENTERING TIMES BEFORE ENTERING TIMES THROUGH THE PROGRAM WILL CAUSE THOSE TIMES TO BE OVERWRITTEN.")
     return entrants
     
 def notRegistered(srlName):
@@ -252,6 +281,9 @@ def run(signupSheet, resultsSheet):
     if signupSheet == None or resultsSheet == None:
         print("Unable to load Google Sheets")
         sys.exit(1)
+        
+        
+    timeString = raceTime(datetime.datetime.now())
 
     # This should be copy/pasted from the .entrants command
     # in SRL. The | and (Ready) can be left in.
@@ -273,7 +305,7 @@ def run(signupSheet, resultsSheet):
         except ValueError:
             print("Can't remove someone not in the race")
 
-    everyone = runnerInfo(signupSheet, resultsSheet, entrants)
+    everyone = runnerInfo(signupSheet, resultsSheet, entrants, timeString)
     
     # Print out a viewing link
     kadgar(everyone, entrants)
