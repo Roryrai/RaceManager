@@ -1,6 +1,6 @@
 {
     "signup_id": "1z0sZm8WBAsbWQLeQIVTgntvUxHj4bwAvCFOTQ5ZkGyQ",
-    "signup_range": "Form Responses 1!C2:P20",
+    "signup_range": "Form Responses 1!C2:P21",
     "results_id": "1cV-HYjTG9n00WkCWLhEspaZGHfOzxLud020CGpKbdAs",
     "results_range": "Times!A2:X",
     "scopes": ["https://www.googleapis.com/auth/spreadsheets"],

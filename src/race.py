@@ -88,8 +88,11 @@ def raceDates(entrants, resultsSheet, everyone):
 def kadgar(map, entrants):
     url = VIEWING_URL
     for name in entrants:
-        twitchName = map[name]["twitch"]
-        url += "/" + twitchName
+        try:
+            twitchName = map[name]["twitch"]
+            url += "/" + twitchName
+        except KeyError:
+            print("Twitch Name lookup for %s failed - that name couldn't be found in the registered entrants." % name)
     print("\nViewing link: %s\n" % url)
 
 
@@ -218,17 +221,30 @@ def unready(entrants):
 
 # Exclude all entrants in the race who are already maxed out
 def excludeMaxedOut(everyone, entrants):
-    excluded = list()
+    maxed = list()
+    notEntered = list()
     for runner in entrants:
-        if everyone[runner]["raceNumber"] == -1:
-            excluded.append(runner)
-    if len(excluded) > 0:
+        try:
+            if everyone[runner]["raceNumber"] == -1:
+                maxed.append(runner)
+        except KeyError:
+            notEntered.append(runner)
+    if len(maxed) > 0:
         print("The following runners have reached the maximum number of allowable races and will be excluded from results entry:")
-        print(excluded)
+        print(maxed)
         print()
-        for runner in excluded:
-            entrants.remove(runner)     
+        for runner in maxed:
+            entrants.remove(runner)
+    if len(notEntered) > 0:
+        print("The following runners are not registered for the tournament. If they intend to register, please enter their times manually for this race.")
+        print(notEntered)
+        print()
+        for runner in notEntered:
+            entrants.remove(runner)
     return entrants
+    
+def notRegistered(srlName):
+    print("%s is not registered for the tournament and will not be updated in the results sheet.\nIf they intend to register please update their time manually." % srlName)
 
 
 # Run the program once data has been retrieved
@@ -327,7 +343,6 @@ def updateResults(data):
     
     result = service.spreadsheets().values().update(spreadsheetId=RESULTS_SHEET_ID, range=RESULTS_SHEET_RANGE, valueInputOption="RAW", body=body).execute()
     print("{0} cells updated.".format(result.get("updatedCells")))
-
     
 # Loads the settings in the file config.json
 def loadConfig():
@@ -373,10 +388,10 @@ def main():
     resultsSheet = getSheet(RESULTS_SHEET_ID, RESULTS_SHEET_RANGE)
     
     # Handle command line args
-    if len(sys.argv) == 1 and sys.argv[1] == "--check":
+    if len(sys.argv) == 2 and sys.argv[1] == "--check":
         checkSheets(signupSheet, resultsSheet)
         sys.exit(0)
-    elif len(sys.argv) != 0:
+    elif len(sys.argv) != 1:
         print("Invalid arguments")
         sys.exit(1)
     
