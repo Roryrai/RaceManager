@@ -47,7 +47,7 @@ def runnerInfo(signupSheet, resultsSheet, entrants, timeString):
             # Figure out how many races this person has done
             # -1 means they've done all their possible races
             for resultsSheetRow in resultsSheet:
-                if resultsSheetRow[0] == row[PREFERRED_COLUMN_INDEX]:
+                if resultsSheetRow[0] == row[TWITCH_COLUMN_INDEX]:
                     for i in range(RACE_DATES_COLUMN_INDEX, len(resultsSheetRow), 2):
                         if resultsSheetRow[i] == "":
                             info["raceNumber"] = int((i - RACE_DATES_COLUMN_INDEX) / 2)
@@ -180,7 +180,7 @@ def matchResultPattern(time):
 def addResult(everyone, runner, time, results):
     finished = 0
     for row in results:
-        if everyone[runner]["preferred"] == row[0]:
+        if everyone[runner]["twitch"] == row[0]:
             raceIndex = everyone[runner]["raceNumber"] + RACE_TIMES_COLUMN_INDEX
             if row[raceIndex] is "":
                 finished = 1
@@ -226,7 +226,7 @@ def confirmTimes(sheet, everyone, entrants):
     pad = 15
     for name in entrants:
         for row in sheet:
-            if everyone[name]["preferred"] == row[0]:
+            if everyone[name]["twitch"] == row[0]:
                 # print(name + ":" + " "*(pad-len(name)) + row[everyone[name]["raceNumber"] + RACE_TIMES_COLUMN_INDEX])
                 print("%s:%s%s" % (name, " "*(pad-len(name)), row[everyone[name]["raceNumber"] + RACE_TIMES_COLUMN_INDEX]))
     # printSheet(sheet)
@@ -408,7 +408,7 @@ def loadConfig():
 def checkSheets(signup, results):
     print("SIGNUP SHEET")
     print("-"*80)
-    printSheet(signup, 15)
+    printSheet(signup, 24)
     print("RESULTS SHEET")
     print("-"*80)
     printSheet(results, 15)
